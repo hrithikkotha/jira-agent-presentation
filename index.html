@@ -1,0 +1,2608 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JiraAgent — Architecture & Agent Reference</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <style>
+    /* === CodeMie Design System — inlined === */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --text-xs-1: .625rem;
+      --text-xs: .75rem;
+      --text-sm-1: .813rem;
+      --text-sm: .875rem;
+      --text-base: 1rem;
+      --text-h1: 2rem;
+      --text-h2: 1.5rem;
+      --text-h3: 1rem;
+      --text-h4: .875rem;
+      --text-h5: .75rem;
+      --lh-h1: 2rem;
+      --lh-h2: 1.5rem;
+      --lh-h3: 1.3125rem;
+      --lh-h4: 1.125rem;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --radius-xl: 12px;
+      --radius-2xl: 16px;
+      --radius-full: 9999px;
+      --space-0-5: .125rem;
+      --space-1: .25rem;
+      --space-1-5: .375rem;
+      --space-2: .5rem;
+      --space-2-5: .625rem;
+      --space-3: .75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, .5), 0 2px 4px -2px rgba(0, 0, 0, .3);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, .6), 0 4px 6px -4px rgba(0, 0, 0, .4);
+      --transition-fast: 120ms ease;
+      --transition-base: 200ms ease;
+      --z-dropdown: 30;
+      --z-modal: 50
+    }
+
+    :root,
+    :root.dark {
+      --color-bg-page: #1A1A1A;
+      --color-bg-sidebar: #151515;
+      --color-bg-card: #151515;
+      --color-bg-nav: #000;
+      --color-bg-elevated: #2E2E2E;
+      --color-bg-secondary: #212224;
+      --color-bg-tertiary: #2E3033;
+      --color-bg-quaternary: #333436;
+      --color-bg-hover: #212224;
+      --color-bg-hover-strong: #333436;
+      --color-bg-input: #1A1A1A;
+      --color-bg-btn-primary: #20222E;
+      --color-bg-btn-primary-h: #262941;
+      --color-text-primary: #FFF;
+      --color-text-secondary: #F2F0EF;
+      --color-text-tertiary: #CCC;
+      --color-text-muted: #BBB;
+      --color-text-placeholder: #CCC;
+      --color-text-link: #F2F0EF;
+      --color-text-heading: #BBB;
+      --color-border-primary: #333436;
+      --color-border-secondary: #47484A;
+      --color-border-structural: #333436;
+      --color-border-subtle: #4C4C4C;
+      --color-border-accent: #FFF;
+      --color-border-focus: #FFF;
+      --color-border-error: #F9303C;
+      --color-border-panel: #333436;
+      --color-icon-primary: #FFF;
+      --color-icon-secondary: #CCC;
+      --color-icon-tertiary: #999;
+      --color-success: #259F4C;
+      --color-success-bg: #1B271F;
+      --color-success-border: #259F4C;
+      --color-success-text: #259F4C;
+      --color-error: #F9303C;
+      --color-error-bg: #262121;
+      --color-error-border: #FE3B4C;
+      --color-error-text: #FE3B4C;
+      --color-warning: #F5A534;
+      --color-warning-bg: #492B00;
+      --color-warning-border: #663B00;
+      --color-warning-text: #F5A534;
+      --color-info: #2297F6;
+      --color-info-bg: #002442;
+      --color-info-border: #003A69;
+      --color-info-text: #2297F6;
+      --color-purple: #C084FC;
+      --color-purple-bg: #2D1B3D;
+      --color-purple-border: #2D1B3D;
+      --color-purple-text: #F3E8FF;
+      --color-cyan: #06B6D4;
+      --color-cyan-bg: #003942;
+      --color-cyan-border: #005866;
+      --status-not-started-text: #A0A0A0;
+      --status-not-started-bg: #333;
+      --status-not-started-border: #4C4C4C;
+      --status-in-progress-text: #2297F6;
+      --status-in-progress-bg: #002442;
+      --status-in-progress-border: #003A69;
+      --status-pending-text: #06B6D4;
+      --status-pending-bg: #003942;
+      --status-pending-border: #005866;
+      --status-success-text: #259F4C;
+      --status-success-bg: #1B271F;
+      --status-success-border: #259F4C;
+      --status-error-text: #FE3B4C;
+      --status-error-bg: #262121;
+      --status-error-border: #FE3B4C;
+      --status-warning-text: #F5A534;
+      --status-warning-bg: #492B00;
+      --status-warning-border: #663B00;
+      --status-advanced-text: #C084FC;
+      --status-advanced-bg: #2D1B3D;
+      --status-advanced-border: #2D1B3D;
+      --gradient-primary-btn: linear-gradient(90deg, #672D92, #547CCC);
+      --gradient-brand: linear-gradient(152deg, #0078C2, #0047FF, #8453D2);
+      --gradient-magical: linear-gradient(90deg, #672D92, #5677C8)
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth
+    }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      line-height: 1.5;
+      color: var(--color-text-primary);
+      background-color: var(--color-bg-page);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    a {
+      color: var(--color-text-link);
+      text-decoration: none
+    }
+
+    a:hover {
+      text-decoration: underline
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--color-border-subtle);
+      border-radius: 9999px
+    }
+
+    ::selection {
+      background: rgba(34, 151, 246, .3);
+      color: var(--color-text-primary)
+    }
+
+    img,
+    svg,
+    video {
+      display: block;
+      max-width: 100%
+    }
+
+    ul,
+    ol {
+      list-style: none
+    }
+
+    code,
+    pre,
+    kbd {
+      font-family: var(--font-mono)
+    }
+
+    code {
+      font-size: .875em;
+      background: var(--color-bg-quaternary);
+      color: var(--color-text-secondary);
+      padding: .1em .4em;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border-primary)
+    }
+
+    pre {
+      background: var(--color-bg-quaternary);
+      border: 1px solid var(--color-border-primary);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      overflow-x: auto;
+      font-size: var(--text-xs);
+      line-height: 1.6;
+      color: var(--color-text-secondary)
+    }
+
+    pre code {
+      background: transparent;
+      border: none;
+      padding: 0
+    }
+
+    hr,
+    .divider {
+      border: none;
+      border-top: 1px solid var(--color-border-structural);
+      margin: var(--space-4) 0
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 var(--space-6)
+    }
+
+    .container.layout-container {
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1,
+    .h1 {
+      font-size: var(--text-h1);
+      line-height: var(--lh-h1);
+      font-weight: 700;
+      color: var(--color-text-primary);
+      letter-spacing: -.02em
+    }
+
+    h2,
+    .h2 {
+      font-size: var(--text-h2);
+      line-height: var(--lh-h2);
+      font-weight: 600;
+      color: var(--color-text-primary)
+    }
+
+    h3,
+    .h3 {
+      font-size: var(--text-h3);
+      line-height: var(--lh-h3);
+      font-weight: 600;
+      color: var(--color-text-primary)
+    }
+
+    h4,
+    .h4 {
+      font-size: var(--text-h4);
+      line-height: var(--lh-h4);
+      font-weight: 600;
+      color: var(--color-text-primary)
+    }
+
+    h5,
+    .h5 {
+      font-size: var(--text-h5);
+      font-weight: 600;
+      color: var(--color-text-primary)
+    }
+
+    p {
+      color: var(--color-text-secondary);
+      font-size: var(--text-sm);
+      line-height: 1.6
+    }
+
+    .text-muted {
+      color: var(--color-text-muted)
+    }
+
+    .text-xs {
+      font-size: var(--text-xs)
+    }
+
+    .text-sm {
+      font-size: var(--text-sm)
+    }
+
+    .text-success {
+      color: var(--color-success-text)
+    }
+
+    .text-error {
+      color: var(--color-error-text)
+    }
+
+    .text-warning {
+      color: var(--color-warning-text)
+    }
+
+    .text-info {
+      color: var(--color-info-text)
+    }
+
+    .font-semibold {
+      font-weight: 600
+    }
+
+    .font-bold {
+      font-weight: 700
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: .9em
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1-5);
+      padding: 0 var(--space-2);
+      height: 17px;
+      line-height: 17px;
+      border-radius: var(--radius-full);
+      border: 1px solid;
+      font-size: var(--text-xs-1);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      white-space: nowrap;
+      flex-shrink: 0
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+      display: inline-block
+    }
+
+    .badge-not-started {
+      background-color: var(--status-not-started-bg);
+      color: var(--status-not-started-text);
+      border-color: var(--status-not-started-border)
+    }
+
+    .badge-in-progress {
+      background-color: var(--status-in-progress-bg);
+      color: var(--status-in-progress-text);
+      border-color: var(--status-in-progress-border)
+    }
+
+    .badge-success {
+      background-color: var(--status-success-bg);
+      color: var(--status-success-text);
+      border-color: var(--status-success-border)
+    }
+
+    .badge-error {
+      background-color: var(--status-error-bg);
+      color: var(--status-error-text);
+      border-color: var(--status-error-border)
+    }
+
+    .badge-warning {
+      background-color: var(--status-warning-bg);
+      color: var(--status-warning-text);
+      border-color: var(--status-warning-border)
+    }
+
+    .badge-advanced {
+      background-color: var(--status-advanced-bg);
+      color: var(--status-advanced-text);
+      border-color: var(--status-advanced-border)
+    }
+
+    .badge-pending {
+      background-color: var(--status-pending-bg);
+      color: var(--status-pending-text);
+      border-color: var(--status-pending-border)
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border-secondary);
+      background-color: var(--color-bg-secondary);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-text-tertiary);
+      white-space: nowrap
+    }
+
+    .tag-blue {
+      background-color: var(--color-info-bg);
+      border-color: var(--color-info-border);
+      color: var(--color-info-text)
+    }
+
+    .tag-green {
+      background-color: var(--color-success-bg);
+      border-color: var(--color-success-border);
+      color: var(--color-success-text)
+    }
+
+    .tag-yellow {
+      background-color: var(--color-warning-bg);
+      border-color: var(--color-warning-border);
+      color: var(--color-warning-text)
+    }
+
+    .tag-purple {
+      background-color: var(--color-purple-bg);
+      border-color: var(--color-purple-border);
+      color: var(--color-purple-text)
+    }
+
+    .tag-red {
+      background-color: var(--color-error-bg);
+      border-color: var(--color-error-border);
+      color: var(--color-error-text)
+    }
+
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-md);
+      border: 1px solid;
+      font-size: var(--text-xs);
+      line-height: 1.5
+    }
+
+    .alert-info {
+      background-color: var(--color-info-bg);
+      border-color: var(--color-info-border);
+      color: var(--color-info-text)
+    }
+
+    .alert-warning {
+      background-color: var(--color-warning-bg);
+      border-color: var(--color-warning-border);
+      color: var(--color-warning-text)
+    }
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border-structural);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      transition: border-color var(--transition-base)
+    }
+
+    .card:hover {
+      border-color: var(--color-border-secondary)
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4);
+      border-bottom: 1px solid var(--color-border-structural)
+    }
+
+    .card-body {
+      flex: 1;
+      padding: var(--space-4)
+    }
+
+    .card-title {
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--color-text-primary)
+    }
+
+    .stat-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border-structural);
+      border-radius: var(--radius-xl)
+    }
+
+    .stat-card-label {
+      font-size: var(--text-xs-1);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--color-text-muted)
+    }
+
+    .stat-card-value {
+      font-size: var(--text-h2);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--color-text-primary)
+    }
+
+    .stat-card-desc {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted)
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: var(--space-3)
+    }
+
+    .dl-grid {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: var(--space-2) var(--space-4);
+      font-size: var(--text-sm)
+    }
+
+    .dl-grid dt {
+      color: var(--color-text-muted);
+      font-weight: 500;
+      white-space: nowrap
+    }
+
+    .dl-grid dd {
+      color: var(--color-text-primary)
+    }
+
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto
+    }
+
+    table.table,
+    .table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: var(--text-xs);
+      line-height: 1.3
+    }
+
+    .table thead tr th {
+      text-align: left;
+      padding: var(--space-2-5) var(--space-4);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      background-color: var(--color-bg-quaternary);
+      border-top: 1px solid var(--color-border-structural);
+      border-bottom: 1px solid var(--color-border-structural);
+      white-space: nowrap
+    }
+
+    .table thead tr th:first-child {
+      border-left: 1px solid var(--color-border-structural);
+      border-radius: var(--radius-lg) 0 0 0
+    }
+
+    .table thead tr th:last-child {
+      border-right: 1px solid var(--color-border-structural);
+      border-radius: 0 var(--radius-lg) 0 0
+    }
+
+    .table tbody tr td {
+      padding: var(--space-3) var(--space-4);
+      color: var(--color-text-secondary);
+      border-bottom: 1px solid var(--color-border-structural);
+      vertical-align: middle
+    }
+
+    .table tbody tr:hover td {
+      background-color: var(--color-bg-hover)
+    }
+
+    .table tbody tr:last-child td {
+      border-bottom: none
+    }
+
+    .flex {
+      display: flex
+    }
+
+    .flex-col {
+      flex-direction: column
+    }
+
+    .items-center {
+      align-items: center
+    }
+
+    .items-start {
+      align-items: flex-start
+    }
+
+    .justify-between {
+      justify-content: space-between
+    }
+
+    .justify-center {
+      justify-content: center
+    }
+
+    .gap-1 {
+      gap: var(--space-1)
+    }
+
+    .gap-2 {
+      gap: var(--space-2)
+    }
+
+    .gap-3 {
+      gap: var(--space-3)
+    }
+
+    .gap-4 {
+      gap: var(--space-4)
+    }
+
+    .gap-6 {
+      gap: var(--space-6)
+    }
+
+    .flex-wrap {
+      flex-wrap: wrap
+    }
+
+    .flex-1 {
+      flex: 1
+    }
+
+    .flex-shrink-0 {
+      flex-shrink: 0
+    }
+
+    .grid {
+      display: grid
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .p-1 {
+      padding: var(--space-1)
+    }
+
+    .p-2 {
+      padding: var(--space-2)
+    }
+
+    .p-3 {
+      padding: var(--space-3)
+    }
+
+    .p-4 {
+      padding: var(--space-4)
+    }
+
+    .p-6 {
+      padding: var(--space-6)
+    }
+
+    .px-2 {
+      padding-left: var(--space-2);
+      padding-right: var(--space-2)
+    }
+
+    .px-4 {
+      padding-left: var(--space-4);
+      padding-right: var(--space-4)
+    }
+
+    .py-2 {
+      padding-top: var(--space-2);
+      padding-bottom: var(--space-2)
+    }
+
+    .py-3 {
+      padding-top: var(--space-3);
+      padding-bottom: var(--space-3)
+    }
+
+    .mt-1 {
+      margin-top: var(--space-1)
+    }
+
+    .mt-2 {
+      margin-top: var(--space-2)
+    }
+
+    .mt-3 {
+      margin-top: var(--space-3)
+    }
+
+    .mt-4 {
+      margin-top: var(--space-4)
+    }
+
+    .mt-6 {
+      margin-top: var(--space-6)
+    }
+
+    .mt-8 {
+      margin-top: var(--space-8)
+    }
+
+    .mb-2 {
+      margin-bottom: var(--space-2)
+    }
+
+    .mb-3 {
+      margin-bottom: var(--space-3)
+    }
+
+    .mb-4 {
+      margin-bottom: var(--space-4)
+    }
+
+    .mb-6 {
+      margin-bottom: var(--space-6)
+    }
+
+    .w-full {
+      width: 100%
+    }
+
+    .rounded-xl {
+      border-radius: var(--radius-xl)
+    }
+
+    .rounded-lg {
+      border-radius: var(--radius-lg)
+    }
+
+    .rounded-full {
+      border-radius: var(--radius-full)
+    }
+
+    .border {
+      border: 1px solid var(--color-border-structural)
+    }
+
+    .border-bottom {
+      border-bottom: 1px solid var(--color-border-structural)
+    }
+
+    .bg-secondary {
+      background-color: var(--color-bg-secondary)
+    }
+
+    .bg-tertiary {
+      background-color: var(--color-bg-tertiary)
+    }
+
+    .shadow-md {
+      box-shadow: var(--shadow-md)
+    }
+
+    .overflow-hidden {
+      overflow: hidden
+    }
+
+    .uppercase {
+      text-transform: uppercase
+    }
+
+    /* ── Page-specific styles ── */
+    body {
+      padding: 24px 0 60px;
+    }
+
+    .page-header {
+      background: linear-gradient(135deg, #0a0a1a 0%, #111827 50%, #0a0a1a 100%);
+      border-bottom: 1px solid var(--color-border-structural);
+      padding: 32px 0;
+      margin-bottom: 32px;
+      flex-shrink: 0;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+      background: var(--gradient-brand);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .page-header p {
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+      margin-top: 6px;
+    }
+
+    .section-title {
+      font-size: var(--text-h2);
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title .phase-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-blue {
+      background: #2297F6;
+    }
+
+    .dot-green {
+      background: #259F4C;
+    }
+
+    .dot-orange {
+      background: #F5A534;
+    }
+
+    .dot-red {
+      background: #FE3B4C;
+    }
+
+    .dot-purple {
+      background: #C084FC;
+    }
+
+    /* Phase lane colors */
+    .phase-understand {
+      border-left: 3px solid #2297F6;
+    }
+
+    .phase-implement {
+      border-left: 3px solid #259F4C;
+    }
+
+    .phase-validate {
+      border-left: 3px solid #F5A534;
+    }
+
+    .phase-human {
+      border-left: 3px solid #FE3B4C;
+    }
+
+    /* Agent card */
+    .agent-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border-structural);
+      border-radius: var(--radius-xl);
+      padding: 0;
+      overflow: hidden;
+      transition: border-color 200ms ease, box-shadow 200ms ease;
+    }
+
+    .agent-card:hover {
+      border-color: var(--color-border-secondary);
+      box-shadow: var(--shadow-md);
+    }
+
+    .agent-card-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--color-border-structural);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    .agent-card-name {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: var(--color-text-primary);
+      font-family: var(--font-mono);
+    }
+
+    .agent-card-body {
+      padding: 12px 16px;
+    }
+
+    .agent-card-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+      align-items: flex-start;
+    }
+
+    .agent-card-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      min-width: 64px;
+      flex-shrink: 0;
+      padding-top: 1px;
+    }
+
+    .agent-card-value {
+      font-size: var(--text-xs);
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Model tier badges */
+    .model-haiku {
+      background: #1B271F;
+      color: #259F4C;
+      border: 1px solid #259F4C;
+      padding: 1px 7px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .model-sonnet {
+      background: #002442;
+      color: #2297F6;
+      border: 1px solid #003A69;
+      padding: 1px 7px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .model-opus {
+      background: #2D1B3D;
+      color: #C084FC;
+      border: 1px solid #2D1B3D;
+      padding: 1px 7px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    /* Pipeline flowchart container */
+    .flow-container {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border-structural);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      overflow-x: auto;
+    }
+
+    .flow-container .mermaid {
+      min-width: 900px;
+    }
+
+    /* Complexity table highlight */
+    .trivial-row {
+      background: rgba(37, 159, 76, .06);
+    }
+
+    .small-row {
+      background: rgba(34, 151, 246, .06);
+    }
+
+    .medium-row {
+      background: rgba(245, 165, 52, .06);
+    }
+
+    .large-row {
+      background: rgba(254, 59, 76, .06);
+    }
+
+    /* Model matrix cell colors */
+    .cell-haiku {
+      color: #259F4C;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .cell-sonnet {
+      color: #2297F6;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .cell-opus {
+      color: #C084FC;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    /* Navigation TOC */
+    .toc {
+      height: 100%;
+      overflow-y: auto;
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border-structural);
+      border-radius: var(--radius-xl);
+      padding: 16px;
+    }
+
+    aside {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .toc-item {
+      display: block;
+      padding: 4px 8px;
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: background 120ms, color 120ms;
+    }
+
+    .toc-item:hover {
+      background: var(--color-bg-hover);
+      color: var(--color-text-primary);
+      text-decoration: none;
+    }
+
+    .toc-section {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--color-text-muted);
+      padding: 8px 8px 2px;
+      margin-top: 4px;
+    }
+
+    /* Two-col layout */
+    .layout-with-toc {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 32px;
+      align-items: start;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    main {
+      overflow-y: auto;
+      height: 100%;
+      min-height: 0;
+    }
+
+    @media (max-width: 900px) {
+      .layout-with-toc {
+        grid-template-columns: 1fr;
+      }
+
+      .toc {
+        display: none;
+      }
+    }
+
+    /* Agents grid */
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 16px;
+    }
+
+    /* Phase section */
+    .phase-section {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border-structural);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .phase-header {
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--color-border-structural);
+    }
+
+    .phase-header-blue {
+      background: linear-gradient(90deg, rgba(34, 151, 246, .12) 0%, transparent 100%);
+    }
+
+    .phase-header-green {
+      background: linear-gradient(90deg, rgba(37, 159, 76, .12) 0%, transparent 100%);
+    }
+
+    .phase-header-orange {
+      background: linear-gradient(90deg, rgba(245, 165, 52, .12) 0%, transparent 100%);
+    }
+
+    .phase-header-red {
+      background: linear-gradient(90deg, rgba(254, 59, 76, .12) 0%, transparent 100%);
+    }
+
+    .phase-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .phase-num-blue {
+      background: rgba(34, 151, 246, .2);
+      color: #2297F6;
+    }
+
+    .phase-num-green {
+      background: rgba(37, 159, 76, .2);
+      color: #259F4C;
+    }
+
+    .phase-num-orange {
+      background: rgba(245, 165, 52, .2);
+      color: #F5A534;
+    }
+
+    .phase-num-red {
+      background: rgba(254, 59, 76, .2);
+      color: #FE3B4C;
+    }
+
+    .phase-body {
+      padding: 16px 20px;
+    }
+
+    /* Daily ops */
+    .ops-cmd {
+      background: var(--color-bg-quaternary);
+      border: 1px solid var(--color-border-structural);
+      border-radius: var(--radius-lg);
+      padding: 6px 12px;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: #2297F6;
+      display: inline-block;
+      margin: 2px 0;
+    }
+
+    /* Mermaid dark theme overrides */
+    .mermaid svg {
+      background: transparent !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="container">
+      <div class="flex items-center gap-4 mb-2">
+        <span class="badge badge-in-progress"><span class="badge-dot"></span>Autonomous Agent</span>
+        <span class="badge badge-advanced">TypeScript</span>
+        <span class="badge badge-success">Claude-Powered</span>
+      </div>
+      <h1>JiraAgent Architecture</h1>
+      <p>Complete reference — pipeline, agents, model routing, complexity gating · Generated 2026-05-07</p>
+    </div>
+  </div>
+
+  <div class="container layout-container">
+    <div class="layout-with-toc">
+
+      <!-- TOC -->
+      <aside>
+        <nav class="toc">
+          <div class="toc-section">Overview</div>
+          <a class="toc-item" href="#overview">System Overview</a>
+          <a class="toc-item" href="#stats">Key Metrics</a>
+          <div class="toc-section">Pipeline</div>
+          <a class="toc-item" href="#flowchart">Full Flowchart</a>
+          <a class="toc-item" href="#intake">Ticket Intake</a>
+          <a class="toc-item" href="#phase1">Phase 1 — Understand</a>
+          <a class="toc-item" href="#phase2">Phase 2 — Implement</a>
+          <a class="toc-item" href="#phase3">Phase 3 — Validate</a>
+          <a class="toc-item" href="#phase4">Phase 4 — Human Gate</a>
+          <div class="toc-section">Intelligence</div>
+          <a class="toc-item" href="#complexity">Complexity Gate</a>
+          <a class="toc-item" href="#modelmatrix">Model Router Matrix</a>
+          <div class="toc-section">Agents</div>
+          <a class="toc-item" href="#understand-agents">Understand Agents</a>
+          <a class="toc-item" href="#implement-agents">Implement Agents</a>
+          <a class="toc-item" href="#validate-agents">Validate Agents</a>
+          <div class="toc-section">Data & Ops</div>
+          <a class="toc-item" href="#datatypes">Data Flow Types</a>
+          <a class="toc-item" href="#graphify">Graph Insights</a>
+          <a class="toc-item" href="#daily">Daily Operations</a>
+        </nav>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main>
+
+        <!-- OVERVIEW -->
+        <section id="overview">
+          <div class="section-title"><span class="phase-dot dot-purple"></span> System Overview</div>
+          <div class="card mb-4">
+            <div class="card-body">
+              <p>JiraAgent is an <strong>autonomous AI coding agent</strong> that watches Jira for tickets moved to
+                <em>In Progress</em>, then runs a full 4-phase pipeline — Understand → Implement → Validate → Ship —
+                with zero manual steps until the human review gate.</p>
+              <div class="mt-4 dl-grid">
+                <dt>Entry Point</dt>
+                <dd><code>src/orchestrator/index.ts</code> → <code>runPipeline(ticketKey)</code></dd>
+                <dt>Webhook mode</dt>
+                <dd><code>npm run server</code> — listens on port 3000, polls Jira every 30s</dd>
+                <dt>Manual mode</dt>
+                <dd><code>npx ts-node src/orchestrator/index.ts TICKET-KEY</code></dd>
+                <dt>LLM Backend</dt>
+                <dd>Anthropic Claude via CodeMie proxy → <code>http://127.0.0.1:4001</code></dd>
+                <dt>Target Repo</dt>
+                <dd>Configured in <code>repos.config.json</code> keyed by Jira project prefix</dd>
+                <dt>Branch naming</dt>
+                <dd><code>feature/TICKET-KEY</code> (or <code>TICKET-KEY-agent</code> in test mode)</dd>
+              </div>
+              <div class="alert alert-info mt-4">
+                <strong>Design principle:</strong> The agent commits and pushes NOTHING until a human explicitly types
+                "push", "yes", "lgtm", or "approve" at the interactive terminal prompt. All LLM-generated code stays
+                local until approved.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STATS -->
+        <section id="stats" class="mt-6">
+          <div class="stat-grid mb-6">
+            <div class="stat-card">
+              <span class="stat-card-label">Pipeline Phases</span>
+              <span class="stat-card-value">4</span>
+              <span class="stat-card-desc">Understand → Implement → Validate → Ship</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card-label">Total Agents</span>
+              <span class="stat-card-value">13</span>
+              <span class="stat-card-desc">Across all phases + orchestration</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card-label">Max Fix Retries</span>
+              <span class="stat-card-value">3</span>
+              <span class="stat-card-desc">Per failing test suite</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card-label">Max Revisions</span>
+              <span class="stat-card-value">5</span>
+              <span class="stat-card-desc">Human feedback cycles</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card-label">Complexity Levels</span>
+              <span class="stat-card-value">4</span>
+              <span class="stat-card-desc">Trivial / Small / Medium / Large</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card-label">Graph Nodes</span>
+              <span class="stat-card-value">258</span>
+              <span class="stat-card-desc">379 edges · 29 communities (graphify)</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- FLOWCHART -->
+        <section id="flowchart" class="mt-6">
+          <div class="section-title"><span class="phase-dot dot-blue"></span> Full Pipeline Flowchart</div>
+          <div class="flow-container mb-6">
+            <div class="mermaid">
+              flowchart TD
+              A([🎫 Jira Ticket\nIn Progress]) --> B{Intake Mode}
+              B -->|Webhook POST :3000| C[processQueue]
+              B -->|30s polling| C
+              C --> D[Git: checkout develop\npull + create branch]
+              D --> P1
+
+              subgraph P1["🔵 PHASE 1 — UNDERSTAND"]
+              direction TB
+              E1[ticketParser\nanalyzeTicket] --> E2[complexityGate\nassessComplexity]
+              E2 --> E3[requirementDecomposer\nanalyzeRequirements]
+              E3 --> E4[codebaseScanner\nanalyzeCodebase]
+              E4 --> E5{complexity\ntrivial/small?}
+              E5 -->|yes| E6([skip contextBrief])
+              E5 -->|no| E7[contextBrief\nsynthesizeContext\n→ context_output.md]
+              end
+
+              P1 --> P2
+
+              subgraph P2["🟢 PHASE 2 — IMPLEMENT"]
+              direction TB
+              F1{trivial?} -->|yes| F2([inline specs\nskip specWriter])
+              F1 -->|no| F3[specWriter\nplanImplementation]
+              F2 --> F4
+              F3 --> F4[codeGenerator\nwriteCode\n→ writes files to disk]
+              F4 --> F5[crossFileAuditor\nrunConsistencyCheck]
+              F5 --> F6{testGeneration\n= skip?}
+              F6 -->|trivial| F7([skip testGenerator])
+              F6 -->|minimal/full| F8[testGenerator\nwriteTests]
+              end
+
+              P2 --> P3
+
+              subgraph P3["🟠 PHASE 3 — VALIDATE"]
+              direction TB
+              G1[staticAnalyzer\ndebugCode\nESLint + AI review] --> G2[runTests\nJest]
+              G2 --> G3{Tests\npassed?}
+              G3 -->|yes| G5
+              G3 -->|no, retry ≤3| G4[autoFixer\nfixFile per\nfailed suite]
+              G4 --> G2
+              G3 -->|retries exhausted| G5
+              G5[conflictResolver\nif merge conflicts] --> G6[codeReviewer\nreviewCode\nscore/10 + AC coverage]
+              end
+
+              P3 --> P4
+
+              subgraph P4["🔴 PHASE 4 — HUMAN GATE"]
+              direction TB
+              H1[Print diff summary\n+ Phase 3 score] --> H2[Developer prompt]
+              H2 -->|push/yes/lgtm| H3[commitChanges\npushBranch ✅]
+              H2 -->|skip| H4[commitChanges\nno push 📦]
+              H2 -->|no/reject| H5([discard ❌])
+              H2 -->|feedback text| H6[revisionAgent\napplyRevision]
+              H6 --> H7{revision\ncycle ≤5?}
+              H7 -->|yes - fast revalidate| P3
+              H7 -->|max reached| H2
+              end
+
+              H3 --> DONE([✅ Pipeline Complete\nbranch pushed])
+              H4 --> DONE2([📦 Local commit\nbranch stays local])
+
+              style P1 fill:#001a33,stroke:#2297F6,stroke-width:2px,color:#fff
+              style P2 fill:#001a0d,stroke:#259F4C,stroke-width:2px,color:#fff
+              style P3 fill:#1a0d00,stroke:#F5A534,stroke-width:2px,color:#fff
+              style P4 fill:#1a0000,stroke:#FE3B4C,stroke-width:2px,color:#fff
+              style DONE fill:#1B271F,stroke:#259F4C,color:#259F4C
+              style DONE2 fill:#2D1B3D,stroke:#C084FC,color:#C084FC
+            </div>
+          </div>
+        </section>
+
+        <!-- TICKET INTAKE -->
+        <section id="intake" class="mt-6">
+          <div class="section-title"><span class="phase-dot" style="background:#888"></span> Ticket Intake &amp; Git
+            Setup</div>
+          <div class="card mb-4">
+            <div class="card-body">
+              <p class="mb-3">Before any agent runs, the orchestrator handles two concerns: getting the ticket and
+                preparing the git workspace.</p>
+              <div class="grid grid-2 gap-4">
+                <div>
+                  <div class="font-semibold text-sm mb-2">Webhook / Polling</div>
+                  <ul
+                    style="list-style:disc;padding-left:20px;font-size:var(--text-xs);color:var(--color-text-secondary);line-height:1.8">
+                    <li>Webhook server on <code>:3000</code> receives POST from Jira Automation</li>
+                    <li>OR polls <code>getAssignedTickets()</code> every 30s (configurable via
+                      <code>POLL_INTERVAL_MS</code>)</li>
+                    <li>New tickets go into an in-memory queue</li>
+                    <li><code>processQueue()</code> drains queue sequentially — one ticket at a time</li>
+                    <li>Deduplication prevents same ticket being processed twice</li>
+                  </ul>
+                </div>
+                <div>
+                  <div class="font-semibold text-sm mb-2">Git Branch Setup</div>
+                  <ul
+                    style="list-style:disc;padding-left:20px;font-size:var(--text-xs);color:var(--color-text-secondary);line-height:1.8">
+                    <li><code>resolveRepo(ticketKey)</code> → looks up local repo path from
+                      <code>repos.config.json</code></li>
+                    <li>Checks out <code>develop</code>, runs <code>git pull origin/develop</code></li>
+                    <li>Creates <code>feature/TICKET-KEY</code> (or reuses if exists)</li>
+                    <li>Test mode suffix: <code>feature/TICKET-KEY-agent</code> when <code>testSuffix</code> is set</li>
+                    <li>Push is always a separate explicit step — never auto-pushed</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PHASE 1 -->
+        <section id="phase1" class="mt-6">
+          <div class="section-title"><span class="phase-dot dot-blue"></span> Phase 1 — Understand</div>
+          <div class="phase-section phase-understand">
+            <div class="phase-header phase-header-blue">
+              <div class="phase-number phase-num-blue">1</div>
+              <div>
+                <div class="font-semibold" style="color:#2297F6">UNDERSTAND</div>
+                <div class="text-xs text-muted">Ticket → Structured Requirements → Codebase Context → Implementation
+                  Brief</div>
+              </div>
+              <span class="badge badge-in-progress"><span class="badge-dot"></span>4 Agents</span>
+            </div>
+            <div class="phase-body">
+              <p class="mb-3 text-xs text-muted">Converts a raw Jira ticket into a complete understanding of what needs
+                to change and where. All agents run sequentially; each feeds the next.</p>
+              <div class="flex gap-2 flex-wrap">
+                <span class="tag tag-blue">ticketParser</span>
+                <span style="color:var(--color-text-muted);font-size:12px;align-self:center">→</span>
+                <span class="tag">complexityGate</span>
+                <span style="color:var(--color-text-muted);font-size:12px;align-self:center">→</span>
+                <span class="tag tag-blue">requirementDecomposer</span>
+                <span style="color:var(--color-text-muted);font-size:12px;align-self:center">→</span>
+                <span class="tag tag-blue">codebaseScanner</span>
+                <span style="color:var(--color-text-muted);font-size:12px;align-self:center">→</span>
+                <span class="tag" style="opacity:.6">contextBrief (medium+)</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PHASE 2 -->
+        <section id="phase2" class="mt-4">
+          <div class="section-title"><span class="phase-dot dot-green"></span> Phase 2 — Implement</div>
+          <div class="phase-section phase-implement">
+            <div class="phase-header phase-header-green">
+              <div class="phase-number phase-num-green">2</div>
+              <div>
+                <div class="font-semibold" style="color:#259F4C">IMPLEMENT</div>
+                <div class="text-xs text-muted">Plan → Write Code → Cross-File Audit → Write Tests</div>
+              </div>
+              <span class="badge badge-success"><span class="badge-dot"></span>4 Agents</span>
+            </div>
+            <div class="phase-body">
+              <p class="mb-3 text-xs text-muted">Takes the task list from Phase 1 and produces actual file changes on
+                disk. Each file is written sequentially so later files can reference earlier ones.</p>
+              <div class="flex gap-2 flex-wrap">
+                <span class="tag" style="opacity:.6">specWriter (small+)</span>
+                <span style="color:var(--color-text-muted);font-size:12px;align-self:center">→</span>
+                <span class="tag tag-green">codeGenerator</span>
+                <span style="color:var(--color-text-muted);font-size:12px;align-self:center">→</span>
+                <span class="tag tag-green">crossFileAuditor</span>
+                <span style="color:var(--color-text-muted);font-size:12px;align-self:center">→</span>
+                <span class="tag" style="opacity:.6">testGenerator (small+)</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PHASE 3 -->
+        <section id="phase3" class="mt-4">
+          <div class="section-title"><span class="phase-dot dot-orange"></span> Phase 3 — Validate</div>
+          <div class="phase-section phase-validate">
+            <div class="phase-header phase-header-orange">
+              <div class="phase-number phase-num-orange">3</div>
+              <div>
+                <div class="font-semibold" style="color:#F5A534">VALIDATE</div>
+                <div class="text-xs text-muted">Static Analysis → Test Loop (max 3 retries) → Conflict Resolution → Code
+                  Review</div>
+              </div>
+              <span class="badge badge-warning"><span class="badge-dot"></span>4 Agents + Retry Loop</span>
+            </div>
+            <div class="phase-body">
+              <p class="mb-3 text-xs text-muted">First pass: full validation with ESLint, Jest, and AI review.
+                Subsequent passes (after human revision): fast re-validation — consistency + static + review only (no
+                Jest re-run).</p>
+              <div class="grid grid-2 gap-4">
+                <div>
+                  <div class="font-semibold text-xs mb-2" style="color:#F5A534">First Pass (full)</div>
+                  <ol
+                    style="list-style:decimal;padding-left:18px;font-size:var(--text-xs);color:var(--color-text-secondary);line-height:1.9">
+                    <li>staticAnalyzer → ESLint + AI review</li>
+                    <li>runTests (Jest) → if fail: autoFixer × each suite → retry (max 3)</li>
+                    <li>conflictResolver → only if merge conflicts detected</li>
+                    <li>codeReviewer → AC coverage + security + score/10</li>
+                  </ol>
+                </div>
+                <div>
+                  <div class="font-semibold text-xs mb-2" style="color:#888">Post-Revision (fast)</div>
+                  <ol
+                    style="list-style:decimal;padding-left:18px;font-size:var(--text-xs);color:var(--color-text-secondary);line-height:1.9">
+                    <li>crossFileAuditor → consistency check</li>
+                    <li>staticAnalyzer → static review only</li>
+                    <li>codeReviewer → final quality gate</li>
+                    <li>(Jest skipped — assumes feedback was targeted)</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PHASE 4 -->
+        <section id="phase4" class="mt-4">
+          <div class="section-title"><span class="phase-dot dot-red"></span> Phase 4 — Human Review Gate</div>
+          <div class="phase-section phase-human">
+            <div class="phase-header phase-header-red">
+              <div class="phase-number phase-num-red">4</div>
+              <div>
+                <div class="font-semibold" style="color:#FE3B4C">HUMAN REVIEW GATE</div>
+                <div class="text-xs text-muted">Interactive terminal prompt — developer approves, rejects, or gives
+                  feedback</div>
+              </div>
+              <span class="badge badge-error"><span class="badge-dot"></span>Human Decision</span>
+            </div>
+            <div class="phase-body">
+              <p class="mb-3 text-xs text-muted">The only blocking step. Prints a diff summary and Phase 3 scores, then
+                waits for developer input. The input itself is classified by keyword matching.</p>
+              <div class="table-wrapper">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>What you type</th>
+                      <th>Action</th>
+                      <th>Result</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>push</code> / <code>yes</code> / <code>lgtm</code> / <code>approve</code></td>
+                      <td class="text-success font-semibold">Approve</td>
+                      <td>commit + push to target branch</td>
+                    </tr>
+                    <tr>
+                      <td><code>skip</code> / <code>s</code> / <code>local</code></td>
+                      <td class="text-warning font-semibold">Skip-push</td>
+                      <td>commit locally, no push</td>
+                    </tr>
+                    <tr>
+                      <td><code>no</code> / <code>reject</code> / <code>abort</code></td>
+                      <td class="text-error font-semibold">Reject</td>
+                      <td>discard all changes, exit</td>
+                    </tr>
+                    <tr>
+                      <td><em>anything else</em></td>
+                      <td style="color:#C084FC" class="font-semibold">Revise</td>
+                      <td>input becomes feedback → revisionAgent → loop back to Phase 3</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="alert alert-warning mt-3">Max 5 revision cycles. After cycle 5 the agent enters a final review
+                loop without further revision capability.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- COMPLEXITY GATE -->
+        <section id="complexity" class="mt-6">
+          <div class="section-title"><span class="phase-dot" style="background:#C084FC"></span> Complexity Gate</div>
+          <div class="card mb-4">
+            <div class="card-header">
+              <div class="card-title">assessComplexity() — Controls Pipeline Behavior</div>
+            </div>
+            <div class="card-body">
+              <p class="mb-3 text-xs">Scored from ticket fields after ticketParser runs. Determines model tier, token
+                budgets, task limits, and which pipeline steps to skip.</p>
+              <div class="table-wrapper">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Level</th>
+                      <th>AC Count</th>
+                      <th>Change Signals</th>
+                      <th>Story Points</th>
+                      <th>maxTasks</th>
+                      <th>maxTokens</th>
+                      <th>maxFiles</th>
+                      <th>Synthesis</th>
+                      <th>Planning</th>
+                      <th>Tests</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="trivial-row">
+                      <td><span class="badge badge-success">trivial</span></td>
+                      <td>≤1</td>
+                      <td>≤1</td>
+                      <td>≤1</td>
+                      <td class="font-bold">2</td>
+                      <td class="font-bold">4,096</td>
+                      <td class="font-bold">3</td>
+                      <td><span class="text-error">skip</span></td>
+                      <td><span class="text-error">skip</span></td>
+                      <td><span class="text-error">skip</span></td>
+                    </tr>
+                    <tr class="small-row">
+                      <td><span class="badge badge-in-progress">small</span></td>
+                      <td>≤2</td>
+                      <td>≤3</td>
+                      <td>≤3</td>
+                      <td class="font-bold">5</td>
+                      <td class="font-bold">8,192</td>
+                      <td class="font-bold">8</td>
+                      <td><span class="text-error">skip</span></td>
+                      <td><span class="text-success">✓</span></td>
+                      <td><span class="text-warning">minimal</span></td>
+                    </tr>
+                    <tr class="medium-row">
+                      <td><span class="badge badge-warning">medium</span></td>
+                      <td>≤5</td>
+                      <td>≤6</td>
+                      <td>≤5</td>
+                      <td class="font-bold">12</td>
+                      <td class="font-bold">16,384</td>
+                      <td class="font-bold">15</td>
+                      <td><span class="text-success">✓</span></td>
+                      <td><span class="text-success">✓</span></td>
+                      <td><span class="text-success">full</span></td>
+                    </tr>
+                    <tr class="large-row">
+                      <td><span class="badge badge-error">large</span></td>
+                      <td>else</td>
+                      <td>else</td>
+                      <td>else</td>
+                      <td class="font-bold">20</td>
+                      <td class="font-bold">32,768</td>
+                      <td class="font-bold">20</td>
+                      <td><span class="text-success">✓</span></td>
+                      <td><span class="text-success">✓</span></td>
+                      <td><span class="text-success">full</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="text-xs text-muted mt-3">Change signals = uiChanges.length + apiChanges.length +
+                dataChanges.length. New component/API creation auto-upgrades to medium+.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- MODEL MATRIX -->
+        <section id="modelmatrix" class="mt-6">
+          <div class="section-title"><span class="phase-dot" style="background:#2297F6"></span> Model Router Matrix
+          </div>
+          <div class="card mb-4">
+            <div class="card-header">
+              <div class="card-title">resolveModel(role, complexity) — Agent × Complexity → Claude Model</div>
+              <div class="flex gap-2">
+                <span class="model-haiku">Haiku</span>
+                <span class="model-sonnet">Sonnet</span>
+                <span class="model-opus">Opus</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-wrapper">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Agent Role</th>
+                      <th>Phase</th>
+                      <th>Trivial</th>
+                      <th>Small</th>
+                      <th>Medium</th>
+                      <th>Large</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="mono">ticketParser</td>
+                      <td><span class="tag tag-blue">Understand</span></td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                    </tr>
+                    <tr>
+                      <td class="mono">requirementDecomposer</td>
+                      <td><span class="tag tag-blue">Understand</span></td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-opus">Opus</td>
+                    </tr>
+                    <tr>
+                      <td class="mono">codebaseScanner</td>
+                      <td><span class="tag tag-blue">Understand</span></td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                    </tr>
+                    <tr>
+                      <td class="mono">contextBrief</td>
+                      <td><span class="tag tag-blue">Understand</span></td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                    </tr>
+                    <tr>
+                      <td class="mono">specWriter</td>
+                      <td><span class="tag tag-green">Implement</span></td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-opus">Opus</td>
+                    </tr>
+                    <tr>
+                      <td class="mono">codeGenerator</td>
+                      <td><span class="tag tag-green">Implement</span></td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-opus">Opus</td>
+                      <td class="cell-opus">Opus</td>
+                    </tr>
+                    <tr>
+                      <td class="mono">crossFileAuditor</td>
+                      <td><span class="tag tag-green">Implement</span></td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                    </tr>
+                    <tr>
+                      <td class="mono">testGenerator</td>
+                      <td><span class="tag tag-green">Implement</span></td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                    </tr>
+                    <tr>
+                      <td class="mono">staticAnalyzer</td>
+                      <td><span class="tag tag-yellow">Validate</span></td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                    </tr>
+                    <tr>
+                      <td class="mono">autoFixer</td>
+                      <td><span class="tag tag-yellow">Validate</span></td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-opus">Opus</td>
+                    </tr>
+                    <tr>
+                      <td class="mono">conflictResolver</td>
+                      <td><span class="tag tag-yellow">Validate</span></td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                    </tr>
+                    <tr>
+                      <td class="mono">codeReviewer</td>
+                      <td><span class="tag tag-yellow">Validate</span></td>
+                      <td class="cell-haiku">Haiku</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-sonnet">Sonnet</td>
+                      <td class="cell-opus">Opus</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="text-xs text-muted mt-3">Principle: generation-critical agents (codeGenerator, autoFixer,
+                codeReviewer) get Opus on large tickets. Extraction/audit agents stay on Haiku/Sonnet. Trivial always
+                uses Haiku across all roles.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- UNDERSTAND AGENTS -->
+        <section id="understand-agents" class="mt-6">
+          <div class="section-title"><span class="phase-dot dot-blue"></span> Understand Agents — Detail</div>
+          <div class="agents-grid mb-4">
+
+            <!-- ticketParser -->
+            <div class="agent-card phase-understand">
+              <div class="agent-card-header">
+                <span class="agent-card-name">ticketParser</span>
+                <div class="flex gap-1">
+                  <span class="model-haiku">Haiku</span>
+                  <span class="model-sonnet">Sonnet</span>
+                </div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Extract <em>only</em> what is explicitly stated in the Jira ticket. No
+                    inference, no expansion.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value"><code>JiraTicket</code> — key, summary, description, acceptanceCriteria,
+                    comments[], links[]</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value"><code>ParsedRequirements</code> — userStory, acceptanceCriteria[],
+                    technicalNotes[], uiChanges[], apiChanges[], dataChanges[], outOfScope[]</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Key rule</div>
+                  <div class="agent-card-value">System prompt forbids inference. "change button text" →
+                    uiChanges=["change button text"], all other arrays empty.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Edge case</div>
+                  <div class="agent-card-value">Regex JSON extraction with try/catch. Returns
+                    <code>AgentResult&lt;ParsedRequirements&gt;</code> — pipeline exits on failure.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- complexityGate -->
+            <div class="agent-card phase-understand">
+              <div class="agent-card-header">
+                <span class="agent-card-name">complexityGate</span>
+                <div class="flex gap-1"><span class="tag" style="font-size:10px">No LLM</span></div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Score ticket complexity to control model selection, token budgets, task
+                    limits, and which steps to skip.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value"><code>JiraTicket</code> + <code>ParsedRequirements</code> (acCount,
+                    changeSignals, storyPoints)</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value"><code>ComplexityConfig</code> — level, maxTasks, maxTokens,
+                    maxCodebaseFiles, skipSynthesis, skipSeparatePlanning, testGeneration</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Logic</div>
+                  <div class="agent-card-value">Pure function — no LLM. AC count + change signals + story points →
+                    trivial/small/medium/large. New component/API creation → auto-upgrades to medium+.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- requirementDecomposer -->
+            <div class="agent-card phase-understand">
+              <div class="agent-card-header">
+                <span class="agent-card-name">requirementDecomposer</span>
+                <div class="flex gap-1"><span class="model-haiku">Haiku</span><span
+                    class="model-sonnet">Sonnet</span><span class="model-opus">Opus</span></div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Convert requirements into the minimum set of file-level tasks. Prefers
+                    fewer, targeted tasks over many small ones.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value"><code>ParsedRequirements</code> + flat repo file structure (all paths) +
+                    <code>maxTasks</code></div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value"><code>ImplementationTask[]</code> — each with id, description, filePath
+                    (must exist in repo), changeType (modify/create/delete), dependsOn[]</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Key rule</div>
+                  <div class="agent-card-value">One task per file. Ordered by dependency. Skips test tasks for trivial
+                    changes. Trims if over maxTasks with a warning.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- codebaseScanner -->
+            <div class="agent-card phase-understand">
+              <div class="agent-card-header">
+                <span class="agent-card-name">codebaseScanner</span>
+                <div class="flex gap-1"><span class="model-haiku">Haiku</span><span class="model-sonnet">Sonnet</span>
+                </div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Identify which files matter for this feature, read them, understand
+                    architecture and tech stack.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value"><code>ParsedRequirements</code> + repoPath + maxFiles (from complexity)
+                  </div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value"><code>CodebaseContext</code> — relevantFiles[], dependencyMap,
+                    architectureNotes, techStack[], testingFramework</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">2-step LLM</div>
+                  <div class="agent-card-value"><strong>Step 1:</strong> identify relevant files from flat list.
+                    <strong>Step 2:</strong> describe files in plain text → convert to JSON (avoids code-in-JSON
+                    escaping bugs).</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Enrichment</div>
+                  <div class="agent-card-value">Reads actual <code>package.json</code> to verify tech stack (React,
+                    Redux, Jest, etc.) — overrides LLM guesses with real deps.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Fallback</div>
+                  <div class="agent-card-value">If JSON parse fails → builds minimal CodebaseContext from file list with
+                    <code>'Identified as relevant'</code> reason.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- contextBrief -->
+            <div class="agent-card phase-understand">
+              <div class="agent-card-header">
+                <span class="agent-card-name">contextBrief</span>
+                <div class="flex gap-1"><span class="model-haiku">Haiku</span><span
+                    class="model-sonnet">Sonnet</span><span class="tag" style="font-size:10px;opacity:.7">medium+
+                    only</span></div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Synthesize all Phase 1 outputs into a human-readable implementation
+                    brief. Skipped for trivial/small.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value">ticket + requirements + codebaseContext + tasks[]</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value"><code>context_output.md</code> written to cwd: brief, keyDecisions[],
+                    implementationOrder[], risks[], contextSummary</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Edge case</div>
+                  <div class="agent-card-value">Falls back to raw LLM text if JSON parse fails — still writes the file.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- IMPLEMENT AGENTS -->
+        <section id="implement-agents" class="mt-6">
+          <div class="section-title"><span class="phase-dot dot-green"></span> Implement Agents — Detail</div>
+          <div class="agents-grid mb-4">
+
+            <!-- specWriter -->
+            <div class="agent-card phase-implement">
+              <div class="agent-card-header">
+                <span class="agent-card-name">specWriter</span>
+                <div class="flex gap-1"><span class="model-haiku">Haiku</span><span
+                    class="model-sonnet">Sonnet</span><span class="model-opus">Opus</span><span class="tag"
+                    style="font-size:10px;opacity:.7">small+ only</span></div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Write per-file implementation specs BEFORE code generation. Skipped for
+                    trivial (inline specs used instead).</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value">ImplementationTask + requirements + codebaseContext + current file
+                    content (first 8000 chars) + dependent file contents (first 4000 chars each)</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value"><code>Record&lt;taskId, specString&gt;</code> — JSON per file: imports,
+                    exports, implementation notes, style notes</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Key rule</div>
+                  <div class="agent-card-value">Sequential per task. Each spec reads dependencies already specified.
+                    "Only cover logic the AC explicitly requires."</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- codeGenerator -->
+            <div class="agent-card phase-implement">
+              <div class="agent-card-header">
+                <span class="agent-card-name">codeGenerator ⭐ Most Critical</span>
+                <div class="flex gap-1"><span class="model-haiku">Haiku</span><span
+                    class="model-sonnet">Sonnet</span><span class="model-opus">Opus</span></div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Write complete file content for each task. Directly produces all code
+                    changes — the most impactful agent in the pipeline.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value">task + spec + requirements + codebaseContext + previously-written files
+                    (dependency awareness) + 2 style reference files</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value"><code>CodeChange[]</code> — each with filePath, originalContent,
+                    newContent, diff, explanation. Written to disk immediately.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Sequential</div>
+                  <div class="agent-card-value">Files written one at a time so each file can reference previously
+                    written files in the same run.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Style</div>
+                  <div class="agent-card-value">Reads 2 existing "modify" files as style references. Strips markdown
+                    fences from output with regex cleanup.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- crossFileAuditor -->
+            <div class="agent-card phase-implement">
+              <div class="agent-card-header">
+                <span class="agent-card-name">crossFileAuditor</span>
+                <div class="flex gap-1"><span class="model-haiku">Haiku</span><span class="model-sonnet">Sonnet</span>
+                </div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Catch cross-file bugs that single-file generation misses — import/export
+                    mismatches, prop chains, Redux shape, wrong names.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value">All CodeChange[] files, read fresh from disk</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value">Fixed files written in-place to disk. Up to 6 files patched per run.
+                  </div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">2-step</div>
+                  <div class="agent-card-value"><strong>Step 1:</strong> plain-text audit (avoids JSON+code escaping
+                    issues). <strong>Step 2:</strong> apply fix per affected file. If "NO ISSUES FOUND" → early exit.
+                  </div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Checks</div>
+                  <div class="agent-card-value">Constants not exported, Redux initialState vs selector shape,
+                    parent→child prop mismatches, wrong import paths, function name mismatches</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- testGenerator -->
+            <div class="agent-card phase-implement">
+              <div class="agent-card-header">
+                <span class="agent-card-name">testGenerator</span>
+                <div class="flex gap-1"><span class="model-haiku">Haiku</span><span
+                    class="model-sonnet">Sonnet</span><span class="tag" style="font-size:10px;opacity:.7">small+
+                    only</span></div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Write focused unit tests that verify acceptance criteria. Skipped for
+                    trivial. "Test what changed, not the entire component."</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value">test ImplementationTask + corresponding impl CodeChange + requirements +
+                    codebaseContext</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value">Test file CodeChange[] written to disk</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Pattern</div>
+                  <div class="agent-card-value">Reads existing test file from repo if found — follows its exact mock
+                    patterns. Defaults: jest.mock, CSS module mocks, redux-mock-store, React Testing Library.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Coverage</div>
+                  <div class="agent-card-value">Happy path + 1 error case per AC. No edge cases unless AC explicitly
+                    names them.</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- VALIDATE AGENTS -->
+        <section id="validate-agents" class="mt-6">
+          <div class="section-title"><span class="phase-dot dot-orange"></span> Validate Agents — Detail</div>
+          <div class="agents-grid mb-4">
+
+            <!-- staticAnalyzer -->
+            <div class="agent-card phase-validate">
+              <div class="agent-card-header">
+                <span class="agent-card-name">staticAnalyzer</span>
+                <div class="flex gap-1"><span class="model-haiku">Haiku</span><span class="model-sonnet">Sonnet</span>
+                </div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Dual-mode static analysis: real ESLint + AI review for things ESLint
+                    can't catch.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value">CodeChange[] + repoPath</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value"><code>DebuggingResult</code> — issues: LintIssue[], passed: boolean,
+                    summary string</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">ESLint</div>
+                  <div class="agent-card-value"><code>execSync</code> with 30s timeout, JSON output format, max-warnings
+                    50. Parses severity 2 = error, 1 = warning.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">AI review</div>
+                  <div class="agent-card-value">Checks: missing imports, undefined vars, React hook misuse (conditional,
+                    missing deps), Redux action type mismatches, wrong prop shapes, async/await errors.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- autoFixer -->
+            <div class="agent-card phase-validate">
+              <div class="agent-card-header">
+                <span class="agent-card-name">autoFixer</span>
+                <div class="flex gap-1"><span class="model-haiku">Haiku</span><span
+                    class="model-sonnet">Sonnet</span><span class="model-opus">Opus</span></div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Fix a specific failing file given test failures + lint issues + review
+                    comments.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value">filePath + failures (TestFailure[]) + lintIssues (LintIssue[]) +
+                    reviewComments (ReviewComment[])</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value">Fixed CodeChange written to disk</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Logic</div>
+                  <div class="agent-card-value">Builds unified issue list from all 3 sources, filtered to this file. If
+                    no issues → no-op return. Called per failed test suite in the 3-retry loop.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Missing module</div>
+                  <div class="agent-card-value">Special case: if error contains "Cannot find module", resolves the
+                    missing module path rather than the test file path.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- conflictResolver -->
+            <div class="agent-card phase-validate">
+              <div class="agent-card-header">
+                <span class="agent-card-name">conflictResolver</span>
+                <div class="flex gap-1"><span class="model-haiku">Haiku</span><span
+                    class="model-sonnet">Sonnet</span><span class="tag" style="font-size:10px;opacity:.7">only if
+                    conflicts</span></div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Resolve git merge conflicts. Only invoked if
+                    <code>getMergeConflicts()</code> returns > 0 conflicts.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value">repoPath — reads files with conflict markers directly</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value">Resolved files written to disk</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Model note</div>
+                  <div class="agent-card-value">Only gets Sonnet on large tickets — Haiku for trivial/small/medium.
+                    Conflict resolution is rarely needed and relatively mechanical.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- codeReviewer -->
+            <div class="agent-card phase-validate">
+              <div class="agent-card-header">
+                <span class="agent-card-name">codeReviewer</span>
+                <div class="flex gap-1"><span class="model-haiku">Haiku</span><span
+                    class="model-sonnet">Sonnet</span><span class="model-opus">Opus</span></div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Final automated quality gate — AC coverage, security, correctness
+                    scoring. Runs every validation cycle.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value">CodeChange[] + ParsedRequirements</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value"><code>ReviewResult</code> — approved:bool, acCoverage[], comments[],
+                    blockers[], suggestions[], overallScore/10</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Checks</div>
+                  <div class="agent-card-value">Every AC has covering code; bugs/logic errors; security (XSS, auth
+                    bypass, missing validation); React/Redux best practices; edge cases (empty state, loading, error).
+                  </div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Display</div>
+                  <div class="agent-card-value">Score + AC fraction shown in console. Blockers listed individually.
+                    Score shown to developer in Phase 4 prompt.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- humanGate -->
+            <div class="agent-card phase-human">
+              <div class="agent-card-header">
+                <span class="agent-card-name">humanGate</span>
+                <div class="flex gap-1"><span class="tag tag-red">Interactive</span><span class="tag"
+                    style="font-size:10px">No LLM</span></div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Final human decision point. Nothing is committed or pushed until this
+                    step approves.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value">CodeChange[] + phase3ReportPath + featureBranch + revisionCycle count
+                  </div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value"><code>HumanReviewDecision</code> — action: approve|reject|skip|revise +
+                    targetBranch + comments + feedback</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Classification</div>
+                  <div class="agent-card-value">Pure keyword matching. "push"/"yes"/"lgtm" → approve. "no"/"reject" →
+                    reject. "skip"/"s" → local commit. Anything else → revise (input = feedback).</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">UX</div>
+                  <div class="agent-card-value">Prints file diff table (modified/created per file with line count).
+                    Reads phase3_report.md for score + AC coverage display.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- revisionAgent -->
+            <div class="agent-card phase-human">
+              <div class="agent-card-header">
+                <span class="agent-card-name">revisionAgent</span>
+                <div class="flex gap-1"><span class="model-sonnet">Sonnet</span><span
+                    class="model-opus">Opus</span><span class="tag" style="font-size:10px;opacity:.7">codeGenerator
+                    model</span></div>
+              </div>
+              <div class="agent-card-body">
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Purpose</div>
+                  <div class="agent-card-value">Apply human feedback precisely to the code. No scope creep. "Make ONLY
+                    what the feedback asks."</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Input</div>
+                  <div class="agent-card-value">feedback string + CodeChange[] + repoPath</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Output</div>
+                  <div class="agent-card-value">Updated CodeChange[] written to disk</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">2-step</div>
+                  <div class="agent-card-value"><strong>Step 1 (triage):</strong> identify which files the feedback
+                    targets → returns [{filePath, instruction}]. <strong>Step 2:</strong> apply per file.</div>
+                </div>
+                <div class="agent-card-row">
+                  <div class="agent-card-label">Fallback</div>
+                  <div class="agent-card-value">If triage returns empty array → applies feedback to ALL files in
+                    changes. Prevents silent no-op on vague feedback.</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- DATA FLOW TYPES -->
+        <section id="datatypes" class="mt-6">
+          <div class="section-title"><span class="phase-dot" style="background:#888"></span> Data Flow — TypeScript
+            Interfaces</div>
+          <div class="card mb-4">
+            <div class="card-body">
+              <p class="mb-3 text-xs text-muted">Each phase produces a typed output that flows into the next. All agents
+                return <code>AgentResult&lt;T&gt;</code> — the pipeline exits on <code>success: false</code>.</p>
+              <div class="flex gap-2 flex-wrap items-center mb-4" style="font-size:12px">
+                <code>JiraTicket</code>
+                <span style="color:#2297F6">→ ticketParser →</span>
+                <code>ParsedRequirements</code>
+                <span style="color:#2297F6">→ requirementDecomposer →</span>
+                <code>ImplementationTask[]</code>
+                <span style="color:#259F4C">→ codeGenerator →</span>
+                <code>CodeChange[]</code>
+                <span style="color:#F5A534">→ codeReviewer →</span>
+                <code>ReviewResult</code>
+                <span style="color:#FE3B4C">→ humanGate →</span>
+                <code>HumanReviewDecision</code>
+              </div>
+              <div class="grid grid-2 gap-4" style="font-size:var(--text-xs)">
+                <div>
+                  <div class="font-semibold mb-2" style="color:#2297F6">Phase 1 Types</div>
+                  <pre style="font-size:11px">JiraTicket {
+  key, summary, description
+  acceptanceCriteria, status
+  priority, storyPoints?
+  comments[], links[]
+}
+
+ParsedRequirements {
+  userStory: string
+  acceptanceCriteria: string[]
+  technicalNotes: string[]
+  uiChanges, apiChanges, dataChanges: string[]
+  outOfScope: string[]
+}
+
+ImplementationTask {
+  id, description
+  filePath: string   // must exist in repo
+  changeType: modify|create|delete
+  dependsOn: string[]
+}</pre>
+                </div>
+                <div>
+                  <div class="font-semibold mb-2" style="color:#259F4C">Phase 2–4 Types</div>
+                  <pre style="font-size:11px">CodebaseContext {
+  relevantFiles: RelevantFile[]
+  dependencyMap: Record&lt;string, string[]&gt;
+  architectureNotes: string
+  techStack: string[]
+  testingFramework: string
+}
+
+CodeChange {
+  filePath: string
+  originalContent, newContent: string
+  diff, explanation: string
+}
+
+ReviewResult {
+  approved: boolean
+  acCoverage: AcCoverageItem[]
+  comments: ReviewComment[]
+  blockers, suggestions: string[]
+  overallScore: number  // 0-10
+}
+
+HumanReviewDecision {
+  action: approve|reject|skip|revise
+  targetBranch, comments, feedback: string
+}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- GRAPHIFY INSIGHTS -->
+        <section id="graphify" class="mt-6">
+          <div class="section-title"><span class="phase-dot" style="background:#C084FC"></span> Knowledge Graph Insights
+            (graphify)</div>
+          <div class="card mb-4">
+            <div class="card-header">
+              <div class="card-title">258 nodes · 379 edges · 29 communities</div>
+              <span class="badge badge-advanced">67% EXTRACTED · 33% INFERRED</span>
+            </div>
+            <div class="card-body">
+              <div class="grid grid-2 gap-4">
+                <div>
+                  <div class="font-semibold text-xs mb-2" style="color:#C084FC">God Nodes (most connected)</div>
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Node</th>
+                        <th>Edges</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><code>runPipeline()</code></td>
+                        <td class="font-bold">29</td>
+                      </tr>
+                      <tr>
+                        <td><code>runPhase3()</code></td>
+                        <td class="font-bold">19</td>
+                      </tr>
+                      <tr>
+                        <td><code>runAgent()</code></td>
+                        <td class="font-bold">15</td>
+                      </tr>
+                      <tr>
+                        <td><code>runPhase2()</code></td>
+                        <td class="font-bold">14</td>
+                      </tr>
+                      <tr>
+                        <td><code>analyzeCodebase()</code></td>
+                        <td class="font-bold">11</td>
+                      </tr>
+                      <tr>
+                        <td><code>readFile()</code></td>
+                        <td class="font-bold">8</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div>
+                  <div class="font-semibold text-xs mb-2" style="color:#2297F6">Surprising Connections</div>
+                  <ul
+                    style="list-style:disc;padding-left:16px;font-size:var(--text-xs);color:var(--color-text-secondary);line-height:2">
+                    <li><strong>Phase 2 Implementation Files</strong> <em>semantically_similar_to</em> <strong>Phase 3
+                        Validation Report</strong> — the agent's code output directly shapes what gets validated</li>
+                    <li><strong>Fix Loop</strong> <em>conceptually_related_to</em> <strong>Phase 3 Validate</strong> —
+                      the retry mechanism IS the validation phase, not separate from it</li>
+                    <li><strong>runPipeline()</strong> <em>calls</em> <strong>processQueue()</strong> — orchestrator is
+                      tightly coupled to webhook server queue</li>
+                  </ul>
+                  <div class="font-semibold text-xs mb-2 mt-4" style="color:#259F4C">High-Cohesion Communities</div>
+                  <ul
+                    style="list-style:disc;padding-left:16px;font-size:var(--text-xs);color:var(--color-text-secondary);line-height:2">
+                    <li>Human Review Gate: <strong>0.70</strong></li>
+                    <li>Test Executor: <strong>0.83</strong></li>
+                    <li>Static Analyzer: <strong>1.00</strong></li>
+                    <li>Implement &amp; Review Agents: <strong>0.27</strong></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- DAILY OPS -->
+        <section id="daily" class="mt-6">
+          <div class="section-title"><span class="phase-dot dot-green"></span> Daily Operations Checklist</div>
+          <div class="card mb-6">
+            <div class="card-body">
+              <div class="alert alert-warning mb-4">
+                The CodeMie proxy SSO token expires every ~24h. The proxy must be running before starting the agent.
+              </div>
+              <div class="grid grid-2 gap-6">
+                <div>
+                  <div class="font-semibold text-xs mb-3">Before Running</div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <div>
+                      <div class="text-xs text-muted mb-1">1. Check proxy status</div>
+                      <div class="ops-cmd">codemie proxy status</div>
+                    </div>
+                    <div>
+                      <div class="text-xs text-muted mb-1">2. If stopped, start it</div>
+                      <div class="ops-cmd">codemie proxy start</div>
+                    </div>
+                    <div>
+                      <div class="text-xs text-muted mb-1">3. Verify auth (expires ~24h)</div>
+                      <div class="ops-cmd">codemie profile status</div>
+                    </div>
+                    <div>
+                      <div class="text-xs text-muted mb-1">4. If auth expired</div>
+                      <div class="ops-cmd">codemie profile refresh</div>
+                    </div>
+                    <div>
+                      <div class="text-xs text-muted mb-1">5. Start the agent</div>
+                      <div class="ops-cmd">npm run server</div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div class="font-semibold text-xs mb-3">Key .env Settings</div>
+                  <pre style="font-size:11px"># CodeMie proxy — must match
+# running proxy port
+ANTHROPIC_BASE_URL=http://127.0.0.1:4001
+ANTHROPIC_API_KEY=codemie-proxy
+
+# Model (default, overridden
+# per-agent by modelRouter)
+CLAUDE_MODEL=claude-sonnet-4-6
+
+# Jira connection
+JIRA_BASE_URL=https://jiraeu.epam.com
+JIRA_AUTH_TYPE=pat
+JIRA_TOKEN=&lt;your-PAT&gt;
+
+# Polling interval (default 30s)
+# POLL_INTERVAL_MS=30000</pre>
+                  <div class="alert alert-info mt-3">
+                    <strong>Why <code>Authorization: Bearer</code>?</strong> The Anthropic SDK sends
+                    <code>x-api-key</code> by default, but the CodeMie proxy only accepts
+                    <code>Authorization: Bearer</code>. The fix is in <code>llmClient.ts</code> —
+                    <code>defaultHeaders</code> adds the Bearer header when a baseURL is configured.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div><!-- layout-with-toc -->
+  </div><!-- container -->
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#1a1a2e',
+        primaryTextColor: '#ffffff',
+        primaryBorderColor: '#2297F6',
+        lineColor: '#47484A',
+        secondaryColor: '#212224',
+        tertiaryColor: '#151515',
+        background: '#1A1A1A',
+        mainBkg: '#151515',
+        nodeBorder: '#47484A',
+        clusterBkg: '#212224',
+        titleColor: '#ffffff',
+        edgeLabelBackground: '#212224',
+        fontFamily: 'Inter, sans-serif',
+        fontSize: '13px'
+      },
+      flowchart: { curve: 'basis', padding: 20 }
+    });
+
+    // Tab-style TOC active highlighting on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const tocLinks = document.querySelectorAll('.toc-item');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          tocLinks.forEach(l => l.style.background = '');
+          const active = document.querySelector(`.toc-item[href="#${e.target.id}"]`);
+          if (active) active.style.background = 'var(--color-bg-hover)';
+        }
+      });
+    }, { threshold: 0.3 });
+    sections.forEach(s => observer.observe(s));
+  </script>
+</body>
+
+</html>
